@@ -56,5 +56,8 @@ if (logoutBtn) {
 
 // Using loadProfileAndTransactions implementation from main.js (demo-aware)
 
-// expose login to global scope so inline onclick handlers work
-try { window.login = login; } catch (e) { /* non-browser or sandboxed environment */ }
+// Attach handler to login button without relying on inline onclick
+window.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('login-btn');
+  if (btn) btn.addEventListener('click', login);
+});
