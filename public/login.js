@@ -3,50 +3,58 @@ async function login() {
   const password = document.getElementById('password').value;
   const errEl = document.getElementById('login-error');
 
+  const IS_GITHUB_PAGES = (location.hostname || '').includes('github.io') || location.pathname.startsWith('/MyBank');
+
   try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Login failed');
+    let data;
+    if (IS_GITHUB_PAGES) {
+      // emulate login in static demo: only accept demo credentials
+      if (!(email === 'admin@mybank.com' && password === '123456')) {
+        throw new Error('Invalid credentials');
+      }
+      data = { token: 'demo-token' };
+    } else {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Login failed');
+    }
 
     localStorage.setItem('authToken', data.token);
+    localStorage.setItem('isLoggedIn', 'true');
     errEl.textContent = '';
     document.getElementById('auth-overlay').style.display = 'none';
     document.getElementById('welcome-msg').style.display = 'block';
     document.getElementById('logout-btn').style.display = 'inline-block';
     await loadProfileAndTransactions();
   } catch (e) {
-    errEl.textContent = e.message;
+    // show user-friendly message
+    const msg = (e && e.message) ? e.message : 'Login failed';
+    if (errEl) errEl.textContent = msg;
   }
 }
 
-document.getElementById('logout-btn').addEventListener('click', () => {
+// Logout handler
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
   localStorage.removeItem('authToken');
-  document.getElementById('auth-overlay').style.display = 'flex';
-  document.getElementById('welcome-msg').style.display = 'none';
-  document.getElementById('logout-btn').style.display = 'none';
-  document.getElementById('balance').textContent = 'Balance: --';
-  const tbody = document.querySelector('#table tbody');
-  tbody.innerHTML = '';
-});
-});
-      if (errorEl) {
-        errorEl.textContent = `Login error: ${data.message}`;
-        errorEl.style.display = 'block';
-      } else {
-        alert(`Login error: ${data.message}`);
-      }
-    }
-  } catch (err) {
-    // Show network error
-    if (errorEl) {
-      errorEl.textContent = 'Network error. Please try again later.';
-      errorEl.style.display = 'block';
-    } else {
-      alert('Network error. Please try again later.');
-    }
-  }
+  localStorage.removeItem('isLoggedIn');
+    const overlay = document.getElementById('auth-overlay');
+    if (overlay) overlay.style.display = 'flex';
+    const welcome = document.getElementById('welcome-msg');
+    if (welcome) welcome.style.display = 'none';
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) balanceEl.textContent = 'Balance: --';
+    const tbody = document.querySelector('#table tbody');
+    if (tbody) tbody.innerHTML = '';
+  });
 }
+
+// Using loadProfileAndTransactions implementation from main.js (demo-aware)
+
+// expose login to global scope so inline onclick handlers work
+try { window.login = login; } catch (e) { /* non-browser or sandboxed environment */ }

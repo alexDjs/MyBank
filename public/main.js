@@ -1,9 +1,11 @@
 // main.js
 
 // API endpoints for expenses and account
-// !!! IMPORTANT: Use server IP address, not localhost !!!
-const API_EXPENSES = 'http://192.168.100.45:3000/expenses';
-const API_ACCOUNT = 'http://192.168.100.45:3000/account';
+// Use relative API paths so frontend works when served from the same host
+// If running on GitHub Pages (static), switch to demo endpoints
+const IS_GITHUB_PAGES = (location.hostname || '').includes('github.io') || location.pathname.startsWith('/MyBank');
+const API_EXPENSES = IS_GITHUB_PAGES ? '/__demo__/transactions' : '/api/transactions';
+const API_ACCOUNT = IS_GITHUB_PAGES ? '/__demo__/profile' : '/api/profile';
 
 // DOM elements
 const tbody = document.querySelector('#table tbody');
@@ -43,14 +45,14 @@ function formatCurrency(n) {
 
 async function loadProfileAndTransactions() {
   try {
-    const profile = await apiGet('/api/profile');
+  const profile = IS_GITHUB_PAGES ? (await Promise.resolve({ name: 'Demo user', email: 'demo@local', bank: 'MyBank', balance: 78160 })) : await apiGet('/api/profile');
     document.getElementById('owner-name').textContent = 'Owner: ' + (profile.name || profile.email);
     document.getElementById('bank-name').textContent = 'Bank: ' + (profile.bank || 'MyBank');
     const balEl = document.getElementById('balance');
     balEl.textContent = 'Balance: ' + formatCurrency(profile.balance || 0);
     balEl.className = (profile.balance >= 0) ? 'positive' : 'negative';
 
-    const data = await apiGet('/api/transactions');
+  const data = IS_GITHUB_PAGES ? (await Promise.resolve([ { id: '1', type: 'in', amount: 1000, date: new Date().toISOString(), location: 'Demo' } ])) : await apiGet('/api/transactions');
     const tbody = document.querySelector('#table tbody');
     tbody.innerHTML = '';
     (data || []).forEach(t => {
@@ -68,10 +70,11 @@ async function loadProfileAndTransactions() {
 
 // Load account and expenses data, update UI
 async function load() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('authToken');
   if (!token) {
     alert('No token. Please login again.');
-    localStorage.removeItem('isLoggedIn');
+  localStorage.removeItem('isLoggedIn');
+  localStorage.removeItem('authToken');
     if (authOverlay) {
         authOverlay.style.display = 'flex';
     }
