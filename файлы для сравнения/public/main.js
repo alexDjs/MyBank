@@ -1,9 +1,9 @@
 // main.js
 
 // API endpoints for expenses and account
-// Use relative API paths so same-origin deployment works both locally and on GitHub Pages
-const API_EXPENSES = '/expenses';
-const API_ACCOUNT = '/account';
+// !!! IMPORTANT: Use server IP address, not localhost !!!
+const API_EXPENSES = 'http://192.168.100.45:3000/expenses';
+const API_ACCOUNT = 'http://192.168.100.45:3000/account';
 
 // DOM elements
 const tbody = document.querySelector('#table tbody');

@@ -4,8 +4,9 @@
   "description": "MyBank demo frontend + backend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "start:both": "node start-both-servers.js"
+  "start": "node server.js",
+  "start:both": "node start-both-servers.js",
+  "test:login": "node scripts/test-login.js"
   },
   "author": "",
   "license": "MIT",
@@ -15,7 +16,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "fs-extra": "^11.1.0",
-    "jsonwebtoken": "^9.0.2"
+  "jsonwebtoken": "^9.0.2",
+  "bcrypt": "^5.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",

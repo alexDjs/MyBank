@@ -46,17 +46,33 @@
  * - Files needed: server.js, public/ folder with your frontend files
  */
 
-// Start backend and a simple static frontend server using CommonJS so Node can run it
-const { spawn } = require('child_process');
-const { join } = require('path');
+// The file is empty. If you want to start both backend and frontend servers, use the following code:
 
-const ROOT = __dirname;
+import { spawn } from 'child_process';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
-console.log('Starting server (serves API + frontend) on port 3000...');
-const proc = spawn('node', [join(ROOT, 'server.js')], {
+// Polyfill __dirname for ES module
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Start backend server on port 3000 (bind to all network interfaces)
+const backend = spawn('node', [join(__dirname, 'server.js')], {
   stdio: 'inherit',
-  env: Object.assign({}, process.env, { PORT: 3000, HOST: '0.0.0.0' })
+  env: { ...process.env, PORT: 3000, HOST: '0.0.0.0' }
 });
+
+console.log('Backend server starting on port 3000 (accessible from network)...');
+
+setTimeout(() => {
+  // Start static server on port 3001 (bind to all network interfaces)
+  const publicPath = join(__dirname, 'public');
+  const frontend = spawn('npx', ['serve', publicPath, '-l', '3001', '--single', '-s'], {
+    stdio: 'inherit',
+    shell: true
+  });
+  console.log('Frontend server starting on port 3001 (accessible from network)...');
+  console.log('Access from phone: http://192.168.100.45:3001');
+}, 5000);
 
 // Tips:
 // - Servers now bind to 0.0.0.0 to allow network access

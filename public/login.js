@@ -1,63 +1,81 @@
-async function login() {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const errEl = document.getElementById('login-error');
+console.log('[login.js] script loaded');
 
-  const IS_GITHUB_PAGES = (location.hostname || '').includes('github.io') || location.pathname.startsWith('/MyBank');
+async function login() {
+  console.log('[login] invoked');
+  const email = document.getElementById('email')?.value || '';
+  const password = document.getElementById('password')?.value || '';
+  const errorEl = document.getElementById('login-error');
+
+  // Clear previous error message
+  if (errorEl) {
+    errorEl.style.display = 'none';
+    errorEl.textContent = '';
+  }
 
   try {
-    let data;
-    if (IS_GITHUB_PAGES) {
-      // emulate login in static demo: only accept demo credentials
-      if (!(email === 'admin@mybank.com' && password === '123456')) {
-        throw new Error('Invalid credentials');
-      }
-      data = { token: 'demo-token' };
-    } else {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Login failed');
-    }
+  // Use relative path so single-origin deployment works
+  const apiUrl = '/login';
 
-    localStorage.setItem('authToken', data.token);
-    localStorage.setItem('isLoggedIn', 'true');
-    errEl.textContent = '';
-    document.getElementById('auth-overlay').style.display = 'none';
-    document.getElementById('welcome-msg').style.display = 'block';
-    document.getElementById('logout-btn').style.display = 'inline-block';
-    await loadProfileAndTransactions();
-  } catch (e) {
-    // show user-friendly message
-    const msg = (e && e.message) ? e.message : 'Login failed';
-    if (errEl) errEl.textContent = msg;
+    console.log('[login] sending POST', apiUrl, { email });
+
+    // Send login request to backend
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    // Try to parse response body safely
+    let data = {};
+    try { data = await response.json(); } catch (e) { console.warn('[login] failed to parse JSON', e); }
+
+    console.log('[login] response', response.status, data);
+
+    if (response.ok) {
+      // Save token and login status, hide overlay, reload page
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('isLoggedIn', 'true');
+      document.getElementById('auth-overlay').style.display = 'none';
+      // reload to trigger app flow
+      location.reload();
+    } else {
+      // Show error message from backend
+      const msg = data && data.message ? data.message : ('Login failed: ' + response.status);
+      if (errorEl) {
+        errorEl.textContent = `Login error: ${msg}`;
+        errorEl.style.display = 'block';
+      } else {
+        alert(`Login error: ${msg}`);
+      }
+    }
+  } catch (err) {
+    console.error('[login] error', err);
+    // Show network error
+    if (errorEl) {
+      errorEl.textContent = 'Network error. Please try again later.';
+      errorEl.style.display = 'block';
+    } else {
+      alert('Network error. Please try again later.');
+    }
   }
 }
 
-// Logout handler
-const logoutBtn = document.getElementById('logout-btn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', () => {
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('isLoggedIn');
-    const overlay = document.getElementById('auth-overlay');
-    if (overlay) overlay.style.display = 'flex';
-    const welcome = document.getElementById('welcome-msg');
-    if (welcome) welcome.style.display = 'none';
-    const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = 'Balance: --';
-    const tbody = document.querySelector('#table tbody');
-    if (tbody) tbody.innerHTML = '';
-  });
+// Robust binding: attach handler immediately if element is present, otherwise on DOMContentLoaded
+function bindLoginButton() {
+  const btn = document.getElementById('login-btn');
+  if (btn) {
+    console.log('[login.js] binding click handler to login-btn');
+    try { btn.removeEventListener('click', login); } catch (e) {}
+    btn.addEventListener('click', login);
+    // fallback
+    btn.onclick = () => { login(); };
+    return true;
+  }
+  return false;
 }
 
-// Using loadProfileAndTransactions implementation from main.js (demo-aware)
-
-// Attach handler to login button without relying on inline onclick
-window.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('login-btn');
-  if (btn) btn.addEventListener('click', login);
-});
+if (!bindLoginButton()) {
+  window.addEventListener('DOMContentLoaded', () => {
+    bindLoginButton();
+  });
+}

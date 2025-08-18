@@ -10,7 +10,7 @@
       "id": "113",
       "email": "admin@mybank.com",
       "password": "$2b$10$RE1M.gTH8xVbB.Ueat6Vwe1yb8nuASKQM4Rea.fPlolOLElmD/V4e",
-      "lastActive": 1754898262991
+      "lastActive": 1755537738361
     },
     {
       "id": "116",
@@ -1185,7 +1185,7 @@
     {
       "id": "460",
       "email": "user7_914503@test.com",
-      "password": "$2b$10$S0pzQhI7yokIS1pGqAbtCOXXvyZzObd1mzN0sL17kj.2J33Rl/Gw9i",
+      "password": "$2b$10$S0pzQhI7yokIS1pGqAbtCOXvyZzObd1mzN0sL17kj.2J33Rl/Gw9i",
       "lastActive": 1749320531989
     },
     {
@@ -1712,14 +1712,5 @@
       "location": "Wroclaw",
       "date": "2025-08-11T07:51:12.515Z"
     }
-  ],
-  "transactions": {
-    "demo@local": [
-      { "id": 1, "type": "salary", "amount": 5000, "date": "2025-08-01", "time": "09:00:00", "location": "Online" },
-      { "id": 2, "type": "purchase", "amount": -120, "date": "2025-08-05", "time": "14:12:00", "location": "Store" },
-      { "id": 3, "type": "transfer", "amount": 200, "date": "2025-08-10", "time": "16:30:00", "location": "Bank" },
-      { "id": 4, "type": "withdrawal", "amount": -60, "date": "2025-08-12", "time": "11:05:00", "location": "ATM" },
-      { "id": 5, "type": "deposit", "amount": 1500, "date": "2025-08-15", "time": "10:20:00", "location": "Branch" }
-    ]
-  }
+  ]
 }
