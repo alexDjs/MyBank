@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "id": 1690000000000,
+      "email": "demo@local",
+      "password": "demo123",
+      "name": "Oleksandr R.",
+      "bank": "MyBank",
+      "balance": 78160,
+      "createdAt": 1690000000000,
+      "tokens": []
+    }
+  ]
+}
