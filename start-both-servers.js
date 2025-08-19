@@ -46,6 +46,7 @@
  * - Files needed: server.js, public/ folder with your frontend files
  */
 
+<<<<<<< HEAD
 // The file is empty. If you want to start both backend and frontend servers, use the following code:
 
 import { spawn } from 'child_process';
@@ -73,6 +74,40 @@ setTimeout(() => {
   console.log('Frontend server starting on port 3001 (accessible from network)...');
   console.log('Access from phone: http://192.168.100.45:3001');
 }, 5000);
+=======
+const { spawn } = require('child_process');
+const { join } = require('path');
+
+const BACKEND_PORT = process.env.PORT || 3000;
+const FRONTEND_PORT = process.env.FRONTEND_PORT || 3001;
+
+try {
+  const backend = spawn(process.execPath, [join(__dirname, 'server.js')], {
+    stdio: 'inherit',
+    env: { ...process.env, PORT: BACKEND_PORT, HOST: '0.0.0.0' }
+  });
+  console.log(`Backend server starting on port ${BACKEND_PORT}...`);
+
+  backend.on('exit', (code) => {
+    console.log('Backend exited with', code);
+  });
+
+  // Start frontend static server after short delay
+  setTimeout(() => {
+    const publicPath = join(__dirname, 'public');
+    const frontend = spawn('npx', ['serve', publicPath, '-l', String(FRONTEND_PORT)], {
+      stdio: 'inherit',
+      shell: true
+    });
+    console.log(`Frontend static server starting on port ${FRONTEND_PORT}...`);
+    frontend.on('exit', (code) => {
+      console.log('Frontend exited with', code);
+    });
+  }, 1000);
+} catch (err) {
+  console.error('Failed to start servers:', err);
+}
+>>>>>>> 5f1913e5ab8256d146bb1ead7784611a303847f4
 
 // Tips:
 // - Servers now bind to 0.0.0.0 to allow network access
@@ -80,3 +115,8 @@ setTimeout(() => {
 // - Windows Firewall may prompt - allow Node.js through the firewall
 // - Use your computer's actual IP address instead of 192.168.100.45
 // - If you see errors, check the terminal output for missing files or port conflicts.
+<<<<<<< HEAD
+=======
+// - Use your computer's actual IP address instead of 192.168.100.45
+// - If you see errors, check the terminal output for missing files or port conflicts.
+>>>>>>> 5f1913e5ab8256d146bb1ead7784611a303847f4

@@ -10,11 +10,8 @@ async function login() {
   }
 
   try {
-    // !!! IMPORTANT: Use server IP address, not localhost !!!
-    // For example, if server is on 192.168.100.45:
-  // const apiUrl = 'https://YOUR_RENDER_URL.onrender.com/login';
-    // If you leave localhost, mobile devices won't be able to connect!
-  const apiUrl = 'https://YOUR_RENDER_URL.onrender.com/login';
+    // Используем адрес Render-бэкенда
+    const apiUrl = 'https://YOUR_RENDER_URL.onrender.com/login';
 
     // Send login request to backend
     const response = await fetch(apiUrl, {
