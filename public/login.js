@@ -3,18 +3,22 @@ async function login() {
   const password = document.getElementById('password').value;
   const errorEl = document.getElementById('login-error');
 
-  // Clear previous error message
+  // Очистка предыдущей ошибки
   if (errorEl) {
     errorEl.style.display = 'none';
     errorEl.textContent = '';
   }
 
   try {
-    // Используем адрес Render-бэкенда
-    const backend = (localStorage.getItem('backendUrl') || '').replace(/\/$/, '');
-    const apiUrl = backend ? `${backend}/login` : 'https://mybank-8s6n.onrender.com/login';
+    // Получаем URL бэкенда из localStorage или используем дефолтный
+    let backend = localStorage.getItem('backendUrl');
+    if (!backend || backend.trim() === '' || backend.trim().startsWith('/')) {
+      backend = 'https://mybank-8s6n.onrender.com';
+    }
 
-    // Send login request to backend
+    const apiUrl = `${backend.replace(/\/$/, '')}/login`;
+
+    // Отправляем POST-запрос на /login
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -24,22 +28,26 @@ async function login() {
     const data = await response.json();
 
     if (response.ok) {
-      // Save token and login status, hide overlay, reload page
+      // Успешный вход: сохраняем токен и статус
       localStorage.setItem('token', data.token);
       localStorage.setItem('isLoggedIn', 'true');
-      document.getElementById('auth-overlay').style.display = 'none';
+
+      // Скрываем overlay и перезагружаем страницу
+      const overlay = document.getElementById('auth-overlay');
+      if (overlay) overlay.style.display = 'none';
       location.reload();
     } else {
-      // Show error message from backend
+      // Ошибка от сервера
+      const message = data.message || 'Login failed';
       if (errorEl) {
-        errorEl.textContent = `Login error: ${data.message}`;
+        errorEl.textContent = `Login error: ${message}`;
         errorEl.style.display = 'block';
       } else {
-        alert(`Login error: ${data.message}`);
+        alert(`Login error: ${message}`);
       }
     }
   } catch (err) {
-    // Show network error
+    // Сетевая ошибка
     if (errorEl) {
       errorEl.textContent = 'Network error. Please try again later.';
       errorEl.style.display = 'block';
