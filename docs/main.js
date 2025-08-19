@@ -1,9 +1,9 @@
 // main.js
 
 // API endpoints for expenses and account
-// !!! IMPORTANT: Use server IP address, not localhost !!!
-const API_EXPENSES = 'http://192.168.100.45:3000/expenses';
-const API_ACCOUNT = 'http://192.168.100.45:3000/account';
+// Используем Render backend для API
+const API_EXPENSES = 'https://mybank-8s6n.onrender.com/expenses';
+const API_ACCOUNT = 'https://mybank-8s6n.onrender.com/account';
 
 // DOM elements
 const tbody = document.querySelector('#table tbody');
