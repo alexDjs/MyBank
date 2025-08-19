@@ -4,8 +4,6 @@
 const API_BASE = 'https://mybank-8s6n.onrender.com';
 const API_EXPENSES = `${API_BASE}/expenses`;
 const API_ACCOUNT = `${API_BASE}/account`;
-const API_EXPENSES = `${API_BASE}/expenses`;
-const API_ACCOUNT = `${API_BASE}/account`;
 
 // DOM elements
 const tbody = document.querySelector('#table tbody');
@@ -132,3 +130,4 @@ window.addEventListener('DOMContentLoaded', () => {
 
   logoutBtn && logoutBtn.addEventListener('click', logout);
 });
+
