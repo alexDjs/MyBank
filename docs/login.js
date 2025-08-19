@@ -1,6 +1,6 @@
 async function login() {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
   const errorEl = document.getElementById('login-error');
 
   // Очистка предыдущей ошибки
@@ -9,14 +9,18 @@ async function login() {
     errorEl.textContent = '';
   }
 
-  try {
-    // Получаем URL бэкенда из localStorage или используем дефолтный
-    let backend = localStorage.getItem('backendUrl');
-    if (!backend || backend.trim() === '' || backend.trim().startsWith('/')) {
-      backend = 'https://mybank-8s6n.onrender.com';
+  // Проверка пустых полей
+  if (!email || !password) {
+    if (errorEl) {
+      errorEl.textContent = 'Please enter email and password';
+      errorEl.style.display = 'block';
     }
+    return;
+  }
 
-    const apiUrl = `${backend.replace(/\/$/, '')}/login`;
+  try {
+    const backend = 'https://mybank-8s6n.onrender.com';
+    const apiUrl = `${backend}/login`;
 
     // Отправляем POST-запрос на /login
     const response = await fetch(apiUrl, {
@@ -32,18 +36,18 @@ async function login() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('isLoggedIn', 'true');
 
-      // Скрываем overlay и перезагружаем страницу
+      // Скрываем overlay
       const overlay = document.getElementById('auth-overlay');
       if (overlay) overlay.style.display = 'none';
-      location.reload();
+
+      // Загружаем данные аккаунта и таблицу расходов без перезагрузки
+      if (typeof load === 'function') load();
     } else {
       // Ошибка от сервера
       const message = data.message || 'Login failed';
       if (errorEl) {
         errorEl.textContent = `Login error: ${message}`;
         errorEl.style.display = 'block';
-      } else {
-        alert(`Login error: ${message}`);
       }
     }
   } catch (err) {
@@ -51,8 +55,6 @@ async function login() {
     if (errorEl) {
       errorEl.textContent = 'Network error. Please try again later.';
       errorEl.style.display = 'block';
-    } else {
-      alert('Network error. Please try again later.');
     }
   }
 }
