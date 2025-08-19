@@ -11,7 +11,7 @@ async function login() {
 
   try {
     // Используем адрес Render-бэкенда
-    const apiUrl = 'https://YOUR_RENDER_URL.onrender.com/login';
+  const apiUrl = 'https://mybank-8s6n.onrender.com/login';
 
     // Send login request to backend
     const response = await fetch(apiUrl, {
