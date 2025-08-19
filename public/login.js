@@ -10,13 +10,9 @@ async function login() {
   }
 
   try {
-    // Получаем URL бэкенда из localStorage или используем дефолтный
-    let backend = localStorage.getItem('backendUrl');
-    if (!backend || backend.trim() === '' || backend.trim().startsWith('/')) {
-      backend = 'https://mybank-8s6n.onrender.com';
-    }
-
-    const apiUrl = `${backend.replace(/\/$/, '')}/login`;
+  // Всегда используем Render backend
+  const backend = 'https://mybank-8s6n.onrender.com';
+  const apiUrl = `${backend}/login`;
 
     // Отправляем POST-запрос на /login
     const response = await fetch(apiUrl, {
