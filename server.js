@@ -1,83 +1,75 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const { createUser, authenticate, getUserByToken, cleanup, findUserByEmail } = require('./register-user');
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+import cors from 'cors';
+
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || process.env.port || 3000;
+app.use(cors({ origin: '*', credentials: true }));
+app.use(bodyParser.json());
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+const SECRET_KEY = process.env.SECRET_KEY || 'your_secret_key';
+const DATA_FILE = 'data.json';
+const TEMP_STORE_FILE = 'temp-store.json';
 
-// Create demo user if not exists
-try {
-  if (!findUserByEmail('demo@local')) {
-    createUser('demo@local', 'demo123', { name: 'Oleksandr R.', balance: 78160 });
-    console.log('Demo user created: demo@local / demo123');
+// Variable to store the next available ID
+let nextId = 1;
+
+// Function to load data from file
+const loadData = () => {
+  if (!fs.existsSync(DATA_FILE)) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify({ users: [], expenses: [], account: {} }, null, 2));
   }
-} catch (e) { console.warn(e.message); }
+  const fileData = fs.readFileSync(DATA_FILE);
+  const data = JSON.parse(fileData);
 
-app.post('/api/register', (req, res) => {
-  const { email, password, name } = req.body || {};
-  if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
-  try {
-    const u = createUser(email, password, { name, balance: 0 });
-    res.json({ ok: true, id: u.id });
-  } catch (e) {
-    res.status(400).json({ message: e.message });
+  // Initialize nextId to be greater than the max ID among users and expenses
+  let maxExpenseId = 0;
+  if (data.expenses && data.expenses.length > 0) {
+      maxExpenseId = Math.max(...data.expenses.map(exp => parseInt(exp.id)).filter(id => !isNaN(id)));
   }
-});
 
-app.post('/api/login', (req, res) => {
-  const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
-  const auth = authenticate(email, password);
-  if (!auth) return res.status(401).json({ message: 'Invalid credentials' });
-  res.json({ token: auth.token });
-});
-
-function requireAuth(req, res, next) {
-  const h = req.headers.authorization || '';
-  const m = h.match(/^Bearer (.+)$/);
-  if (!m) return res.status(401).json({ message: 'No token' });
-  const user = getUserByToken(m[1]);
-  if (!user) return res.status(401).json({ message: 'Invalid token' });
-  req.user = user;
-  next();
-}
-
-app.get('/api/profile', requireAuth, (req, res) => {
-  const u = req.user;
-  res.json({ email: u.email, name: u.name, bank: u.bank, balance: u.balance });
-});
-
-app.get('/api/transactions', requireAuth, (req, res) => {
-  const dataPath = path.join(__dirname, 'data.json');
-  let data = { transactions: {} };
-  try {
-    const raw = fs.readFileSync(dataPath, 'utf8') || '{}';
-    data = JSON.parse(raw);
-  } catch (e) {
-    console.warn('Failed to read data.json, returning empty transactions', e.message);
+  let maxUserId = 0;
+  if (data.users && data.users.length > 0) {
+      maxUserId = Math.max(...data.users.map(user => parseInt(user.id)).filter(id => !isNaN(id)));
   }
-  const txs = (data.transactions && data.transactions[req.user.email]) || [];
-  res.json(txs);
+
+  nextId = Math.max(maxExpenseId, maxUserId) + 1;
+
+  return data;
+};
+
+// Function to save data to file
+const saveData = (data) => {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+};
+
+// Load data once at startup to initialize nextId
+const initialData = loadData(); // No need to use initialData, loadData manages nextId
+
+// Register a new user
+app.post('/register', async (req, res) => {
+  const { email, password } = req.body;
+  const data = loadData();
+
+  const userExists = data.users.find(user => user.email === email);
+  if (userExists) return res.status(400).json({ message: 'User already exists' });
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = { id: nextId.toString(), email, password: hashedPassword, lastActive: Date.now() };
+  nextId++;
+
+  data.users.push(newUser);
+  saveData(data);
+
+  res.status(201).json({ message: 'User registered successfully' });
 });
 
-app.post('/api/cleanup', (req, res) => {
-  cleanup();
-  res.json({ ok: true });
-});
-
-// periodic cleanup
-setInterval(() => {
-  try { cleanup(); console.log('Periodic cleanup done'); } catch (e) { console.warn(e); }
-}, 6 * 3600 * 1000);
-
-app.listen(PORT, () => {
-  console.log(`Server listening at http://0.0.0.0:${PORT}`);
-});
-});
+// User login
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const data = loadData();
@@ -241,73 +233,6 @@ app.get('/', (req, res) => {
   res.send('OK');
 });
 
-// Create demo user if not exists
-try {
-  if (!findUserByEmail('demo@local')) {
-    createUser('demo@local', 'demo123', { name: 'Oleksandr R.', balance: 78160 });
-    console.log('Demo user created: demo@local / demo123');
-  }
-} catch (e) { console.warn(e.message); }
-
-app.post('/api/register', (req, res) => {
-  const { email, password, name } = req.body || {};
-  if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
-  try {
-    const u = createUser(email, password, { name, balance: 0 });
-    res.json({ ok: true, id: u.id });
-  } catch (e) {
-    res.status(400).json({ message: e.message });
-  }
-});
-
-app.post('/api/login', (req, res) => {
-  const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
-  const auth = authenticate(email, password);
-  if (!auth) return res.status(401).json({ message: 'Invalid credentials' });
-  res.json({ token: auth.token });
-});
-
-function requireAuth(req, res, next) {
-  const h = req.headers.authorization || '';
-  const m = h.match(/^Bearer (.+)$/);
-  if (!m) return res.status(401).json({ message: 'No token' });
-  const user = getUserByToken(m[1]);
-  if (!user) return res.status(401).json({ message: 'Invalid token' });
-  req.user = user;
-  next();
-}
-
-app.get('/api/profile', requireAuth, (req, res) => {
-  const u = req.user;
-  res.json({ email: u.email, name: u.name, bank: u.bank, balance: u.balance });
-});
-
-app.get('/api/transactions', requireAuth, (req, res) => {
-  // Read transactions from data.json and return transactions for the authenticated user (by email)
-  const dataPath = path.join(__dirname, 'data.json');
-  let data = { transactions: {} };
-  try {
-    const raw = fs.readFileSync(dataPath, 'utf8') || '{}';
-    data = JSON.parse(raw);
-  } catch (e) {
-    console.warn('Failed to read data.json, returning empty transactions', e.message);
-  }
-  const txs = (data.transactions && data.transactions[req.user.email]) || [];
-  res.json(txs);
-});
-
-// endpoint to trigger cleanup manually (optional)
-app.post('/api/cleanup', (req, res) => {
-  cleanup();
-  res.json({ ok: true });
-});
-
-// start periodic cleanup every 6 hours
-setInterval(() => {
-  try { cleanup(); console.log('Periodic cleanup done'); } catch (e) { console.warn(e); }
-}, 6 * 3600 * 1000);
-
-app.listen(PORT, () => {
-  console.log(`Server listening at http://localhost:${PORT}`);
-});
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
