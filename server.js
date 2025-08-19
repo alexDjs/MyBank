@@ -1,20 +1,16 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const bodyParser = require('body-parser');
-const fs = require('fs');
-const bcrypt = require('bcrypt');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const path = require('path');
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
 app.use(cors({ origin: '*', credentials: true }));
 app.use(bodyParser.json());
-
-// Serve frontend static files from public/ (single-origin deployment)
-app.use(express.static(path.join(__dirname, 'public')));
 
 const SECRET_KEY = process.env.SECRET_KEY || 'your_secret_key';
 const DATA_FILE = 'data.json';
@@ -234,17 +230,7 @@ setInterval(() => {
 
 // Add this route before app.listen(...)
 app.get('/', (req, res) => {
-  // Serve index.html for root
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// SPA fallback: for any non-API route, serve index.html (ensure API routes are defined above)
-app.get('*', (req, res, next) => {
-  // If the request accepts HTML, return index.html; otherwise continue
-  if (req.method === 'GET' && req.accepts('html')) {
-    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  }
-  next();
+  res.send('OK');
 });
 
 // Start the server
