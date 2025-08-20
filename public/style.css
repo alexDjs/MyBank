@@ -19,39 +19,46 @@
     word-break: break-word;
     text-align: right;
   }
-  .expense-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 6px 0;
-    margin: 2px 0;
-    font-size: 1em;
-  }
-  .expense-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 2px 0;
-    font-size: 1em;
+/* Мобильная таблица: супер-адаптивный layout через data-label */
+@media (max-width: 600px) {
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
     width: 100%;
   }
-  .expense-value {
-    color: #222;
-    font-weight: 400;
-    word-break: break-word;
-    text-align: left;
-    flex: 1 1 auto;
-    margin-right: 0;
-    padding-left: 10px;
+  thead {
+    display: none;
   }
-  .expense-label {
+  tbody tr {
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+    background: #fff;
+  }
+  tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: none;
+    font-size: 1em;
+    min-height: 32px;
+    word-break: break-word;
+  }
+  tbody td::before {
+    content: attr(data-label);
     font-weight: 600;
     color: #555;
-    text-align: right;
-    flex: 0 0 auto;
-    margin-left: auto;
-    padding-right: 10px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    min-width: 90px;
+    text-align: left;
   }
+}
 @media (max-width: 600px) {
   .table-wrapper {
     max-height: 300px;
