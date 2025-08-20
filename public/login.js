@@ -68,19 +68,29 @@ function renderExpensesTable(expenses) {
   const tableBody = document.getElementById('expenses-body');
   if (!tableBody) return;
 
-  tableBody.innerHTML = ''; // очищаем старые строки
+  tableBody.innerHTML = '';
 
   expenses.forEach(exp => {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${exp.id}</td>
-      <td>${exp.date}</td>
-      <td>${exp.city}</td>
+      <td>${exp.type}</td>
       <td>${exp.amount}</td>
-      <td>${exp.item}</td>
+      <td>${formatDate(exp.date)}</td>
+      <td>${formatTime(exp.date)}</td>
+      <td>${exp.location}</td>
     `;
     tableBody.appendChild(row);
   });
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString();
+}
+function formatTime(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString();
 }
 
 // Привязка кнопки логина
