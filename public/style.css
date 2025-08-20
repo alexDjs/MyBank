@@ -1,4 +1,11 @@
 /* Адаптивность для мобильных устройств */
+  th:first-child, td:first-child {
+    position: sticky;
+    left: 0;
+    background: #f7f7f7;
+    z-index: 2;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.04);
+  }
 @media (max-width: 600px) {
   .table-wrapper {
     max-height: 300px;
