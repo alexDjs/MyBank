@@ -54,7 +54,7 @@ if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
-    document.getElementById('auth-overlay').style.display = 'block';
+    document.getElementById('auth-overlay').style.display = 'flex'; // Центрируем overlay
     // Таблица и баланс остаются видимыми
   });
 }
