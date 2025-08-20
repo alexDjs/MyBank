@@ -55,9 +55,7 @@ if (logoutBtn) {
     localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
     document.getElementById('auth-overlay').style.display = 'block';
-    const tbody = document.querySelector('#table tbody');
-    if (tbody) tbody.innerHTML = '';
-    document.getElementById('balance').textContent = 'Balance: ---';
+    // Таблица и баланс остаются видимыми
   });
 }
 
