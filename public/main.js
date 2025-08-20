@@ -1,4 +1,3 @@
-
 const token = localStorage.getItem('token');
 
 async function loadExpenses() {
@@ -47,6 +46,19 @@ async function loadExpenses() {
     </tr>
   `).join('');
   loadBalance();
+}
+
+// Обработчик кнопки Logout
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('isLoggedIn');
+    document.getElementById('auth-overlay').style.display = 'block';
+    const tbody = document.querySelector('#table tbody');
+    if (tbody) tbody.innerHTML = '';
+    document.getElementById('balance').textContent = 'Balance: ---';
+  });
 }
 
 // Автоматическое обновление таблицы и баланса каждые 10 секунд
