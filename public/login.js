@@ -75,13 +75,13 @@ function renderExpensesTable(expenses) {
       const block = document.createElement('tr');
       block.innerHTML = `
         <td colspan="6" style="padding:0; border:none;">
-          <div class="expense-card">
-            <div class="expense-row"><span class="expense-label">ID</span><span class="expense-value">${exp.id}</span></div>
-            <div class="expense-row"><span class="expense-label">Type</span><span class="expense-value">${exp.type}</span></div>
-            <div class="expense-row"><span class="expense-label">Amount</span><span class="expense-value">${exp.amount}</span></div>
-            <div class="expense-row"><span class="expense-label">Date</span><span class="expense-value">${formatDate(exp.date)}</span></div>
-            <div class="expense-row"><span class="expense-label">Time</span><span class="expense-value">${formatTime(exp.date)}</span></div>
-            <div class="expense-row"><span class="expense-label">Location</span><span class="expense-value">${exp.location || ''}</span></div>
+          <div class="expense-list">
+            <div class="expense-row"><span class="expense-value">${exp.id}</span><span class="expense-label">ID</span></div>
+            <div class="expense-row"><span class="expense-value">${exp.type}</span><span class="expense-label">Type</span></div>
+            <div class="expense-row"><span class="expense-value">${exp.amount}</span><span class="expense-label">Amount</span></div>
+            <div class="expense-row"><span class="expense-value">${formatDate(exp.date)}</span><span class="expense-label">Date</span></div>
+            <div class="expense-row"><span class="expense-value">${formatTime(exp.date)}</span><span class="expense-label">Time</span></div>
+            <div class="expense-row"><span class="expense-value">${exp.location || ''}</span><span class="expense-label">Location</span></div>
           </div>
         </td>
       `;
