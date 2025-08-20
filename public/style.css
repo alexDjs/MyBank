@@ -30,25 +30,27 @@
   .expense-row {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
     padding: 2px 0;
     font-size: 1em;
+    width: 100%;
   }
   .expense-value {
     color: #222;
     font-weight: 400;
     word-break: break-word;
     text-align: left;
-    min-width: 80px;
-    margin-right: 10px;
+    flex: 1 1 auto;
+    margin-right: 0;
+    padding-left: 10px;
   }
   .expense-label {
     font-weight: 600;
     color: #555;
-    min-width: 80px;
     text-align: right;
-    margin-left: 10px;
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding-right: 10px;
   }
 @media (max-width: 600px) {
   .table-wrapper {
