@@ -1,3 +1,13 @@
+import fs from 'fs';
+// ===== Работа с data.json =====
+const DATA_PATH = './data.json';
+function loadData() {
+  const raw = fs.readFileSync(DATA_PATH, 'utf-8');
+  return JSON.parse(raw);
+}
+function saveData(data) {
+  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
+}
 import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
@@ -17,27 +27,18 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // ===== Имитируем базу данных =====
-let users = [
-  {
-    email: 'admin@mybank.com',
-    passwordHash: await bcrypt.hash('123456', 10) // хеш пароля
-  }
-];
 
-
-let expenses = []; // массив расходов
 let balance = 78160; // стартовый баланс
 
 // ===== Login =====
+
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  const user = users.find(u => u.email === email);
-
+  const data = loadData();
+  const user = data.users.find(u => u.email === email);
   if (!user) return res.status(401).json({ message: 'Invalid email or password' });
-
-  const match = await bcrypt.compare(password, user.passwordHash);
+  const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(401).json({ message: 'Invalid email or password' });
-
   const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '1h' });
   res.json({ token });
 });
@@ -58,54 +59,71 @@ function authMiddleware(req, res, next) {
 }
 
 // ===== Expenses =====
+
 app.get('/expenses', authMiddleware, (req, res) => {
-  res.json(expenses);
+  const data = loadData();
+  res.json(data.expenses);
 });
+
 
 
 app.post('/expenses', authMiddleware, (req, res) => {
-  const { city, item, amount } = req.body;
+  const { type, amount, location, date, direction } = req.body;
+  const data = loadData();
   const expense = {
-    id: expenses.length + 1,
-    city,
-    item,
+    id: String(Date.now()),
+    type,
     amount,
-    date: new Date().toISOString()
+    direction: direction || 'out',
+    location,
+    date: date || new Date().toISOString()
   };
-  expenses.push(expense);
-  balance -= Number(amount) || 0;
+  data.expenses.push(expense);
+  if (expense.direction === 'out') data.account.balance -= Number(amount) || 0;
+  else data.account.balance += Number(amount) || 0;
+  saveData(data);
   res.json(expense);
 });
+
 
 
 app.put('/expenses/:id', authMiddleware, (req, res) => {
-  const id = Number(req.params.id);
-  const expense = expenses.find(e => e.id === id);
+  const id = req.params.id;
+  const data = loadData();
+  const expense = data.expenses.find(e => e.id === id);
   if (!expense) return res.status(404).json({ message: 'Expense not found' });
-
-  const { city, item, amount } = req.body;
-  if (city) expense.city = city;
-  if (item) expense.item = item;
+  const { type, amount, location, date, direction } = req.body;
+  if (type) expense.type = type;
   if (amount) expense.amount = amount;
-
+  if (location) expense.location = location;
+  if (date) expense.date = date;
+  if (direction) expense.direction = direction;
+  saveData(data);
   res.json(expense);
 });
 
 
-app.delete('/expenses/:id', authMiddleware, (req, res) => {
-  const id = Number(req.params.id);
-  const index = expenses.findIndex(e => e.id === id);
-  if (index === -1) return res.status(404).json({ message: 'Expense not found' });
 
-  const deleted = expenses.splice(index, 1);
-  if (deleted[0]) balance += Number(deleted[0].amount) || 0;
+app.delete('/expenses/:id', authMiddleware, (req, res) => {
+  const id = req.params.id;
+  const data = loadData();
+  const index = data.expenses.findIndex(e => e.id === id);
+  if (index === -1) return res.status(404).json({ message: 'Expense not found' });
+  const deleted = data.expenses.splice(index, 1);
+  if (deleted[0]) {
+    if (deleted[0].direction === 'out') data.account.balance += Number(deleted[0].amount) || 0;
+    else data.account.balance -= Number(deleted[0].amount) || 0;
+  }
+  saveData(data);
   res.json(deleted[0]);
 });
 
 
 // ===== Баланс =====
+
 app.get('/account', authMiddleware, (req, res) => {
-  res.json({ balance });
+  const data = loadData();
+  res.json(data.account);
 });
 
 // ===== Старт сервера =====
