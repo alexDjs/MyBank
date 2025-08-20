@@ -68,15 +68,16 @@ app.get('/expenses', authMiddleware, (req, res) => {
 
 
 app.post('/expenses', authMiddleware, (req, res) => {
-  const { type, amount, location, date, direction } = req.body;
+  const { type, amount, location, direction } = req.body;
   const data = loadData();
+  const now = new Date();
   const expense = {
     id: String(Date.now()),
     type,
     amount,
     direction: direction || 'out',
     location,
-    date: date || new Date().toISOString()
+    date: now.toISOString() // сохраняем ISO, фронт покажет HH:mm
   };
   data.expenses.push(expense);
   if (expense.direction === 'out') data.account.balance -= Number(amount) || 0;
