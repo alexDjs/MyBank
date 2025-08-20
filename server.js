@@ -11,8 +11,10 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 const SECRET_KEY = process.env.SECRET_KEY || 'secret';
 
+
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static('public'));
 
 // ===== Имитируем базу данных =====
 let users = [
