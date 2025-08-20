@@ -24,7 +24,9 @@ let users = [
   }
 ];
 
+
 let expenses = []; // массив расходов
+let balance = 78160; // стартовый баланс
 
 // ===== Login =====
 app.post('/login', async (req, res) => {
@@ -60,25 +62,35 @@ app.get('/expenses', authMiddleware, (req, res) => {
   res.json(expenses);
 });
 
+
 app.post('/expenses', authMiddleware, (req, res) => {
-  const { title, amount, city } = req.body;
-  const expense = { id: expenses.length + 1, title, amount, city };
+  const { city, item, amount } = req.body;
+  const expense = {
+    id: expenses.length + 1,
+    city,
+    item,
+    amount,
+    date: new Date().toISOString()
+  };
   expenses.push(expense);
+  balance -= Number(amount) || 0;
   res.json(expense);
 });
+
 
 app.put('/expenses/:id', authMiddleware, (req, res) => {
   const id = Number(req.params.id);
   const expense = expenses.find(e => e.id === id);
   if (!expense) return res.status(404).json({ message: 'Expense not found' });
 
-  const { title, amount, city } = req.body;
-  if (title) expense.title = title;
-  if (amount) expense.amount = amount;
+  const { city, item, amount } = req.body;
   if (city) expense.city = city;
+  if (item) expense.item = item;
+  if (amount) expense.amount = amount;
 
   res.json(expense);
 });
+
 
 app.delete('/expenses/:id', authMiddleware, (req, res) => {
   const id = Number(req.params.id);
@@ -86,7 +98,14 @@ app.delete('/expenses/:id', authMiddleware, (req, res) => {
   if (index === -1) return res.status(404).json({ message: 'Expense not found' });
 
   const deleted = expenses.splice(index, 1);
+  if (deleted[0]) balance += Number(deleted[0].amount) || 0;
   res.json(deleted[0]);
+});
+
+
+// ===== Баланс =====
+app.get('/account', authMiddleware, (req, res) => {
+  res.json({ balance });
 });
 
 // ===== Старт сервера =====
