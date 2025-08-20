@@ -69,18 +69,35 @@ function renderExpensesTable(expenses) {
   if (!tableBody) return;
 
   tableBody.innerHTML = '';
-
+  const isMobile = window.innerWidth <= 600;
   expenses.forEach(exp => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${exp.id}</td>
-      <td>${exp.type}</td>
-      <td>${exp.amount}</td>
-      <td>${formatDate(exp.date)}</td>
-      <td>${formatTime(exp.date)}</td>
-      <td>${exp.location}</td>
-    `;
-    tableBody.appendChild(row);
+    if (isMobile) {
+      const block = document.createElement('tr');
+      block.innerHTML = `
+        <td colspan="6" style="padding:0; border:none;">
+          <div class="expense-card">
+            <div class="expense-row"><span class="expense-label">ID</span><span class="expense-value">${exp.id}</span></div>
+            <div class="expense-row"><span class="expense-label">Type</span><span class="expense-value">${exp.type}</span></div>
+            <div class="expense-row"><span class="expense-label">Amount</span><span class="expense-value">${exp.amount}</span></div>
+            <div class="expense-row"><span class="expense-label">Date</span><span class="expense-value">${formatDate(exp.date)}</span></div>
+            <div class="expense-row"><span class="expense-label">Time</span><span class="expense-value">${formatTime(exp.date)}</span></div>
+            <div class="expense-row"><span class="expense-label">Location</span><span class="expense-value">${exp.location || ''}</span></div>
+          </div>
+        </td>
+      `;
+      tableBody.appendChild(block);
+    } else {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${exp.id}</td>
+        <td>${exp.type}</td>
+        <td>${exp.amount}</td>
+        <td>${formatDate(exp.date)}</td>
+        <td>${formatTime(exp.date)}</td>
+        <td>${exp.location}</td>
+      `;
+      tableBody.appendChild(row);
+    }
   });
 }
 
@@ -90,7 +107,9 @@ function formatDate(dateStr) {
 }
 function formatTime(dateStr) {
   const d = new Date(dateStr);
-  return d.toLocaleTimeString();
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
 }
 
 // Привязка кнопки логина
