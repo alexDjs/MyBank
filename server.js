@@ -1,5 +1,5 @@
 import fs from 'fs';
-// ===== Работа с data.json =====
+// ===== Working with data.json =====
 const DATA_PATH = './data.json';
 function loadData() {
   const raw = fs.readFileSync(DATA_PATH, 'utf-8');
@@ -26,9 +26,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// ===== Имитируем базу данных =====
+// ===== Simulate database =====
 
-let balance = 78160; // стартовый баланс
+let balance = 78160; // initial balance
 
 // ===== Login =====
 
@@ -43,7 +43,7 @@ app.post('/login', async (req, res) => {
   res.json({ token });
 });
 
-// ===== Middleware для проверки токена =====
+// ===== Middleware for token verification =====
 function authMiddleware(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -77,7 +77,7 @@ app.post('/expenses', authMiddleware, (req, res) => {
     amount,
     direction: direction || 'out',
     location,
-    date: now.toISOString() // сохраняем ISO, фронт покажет HH:mm
+  date: now.toISOString() // save ISO, frontend will show HH:mm
   };
   data.expenses.push(expense);
   if (expense.direction === 'out') data.account.balance -= Number(amount) || 0;
@@ -120,14 +120,14 @@ app.delete('/expenses/:id', authMiddleware, (req, res) => {
 });
 
 
-// ===== Баланс =====
+// ===== Balance =====
 
 app.get('/account', authMiddleware, (req, res) => {
   const data = loadData();
   res.json(data.account);
 });
 
-// ===== Старт сервера =====
+// ===== Server start =====
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

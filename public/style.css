@@ -1,4 +1,4 @@
-/* Адаптивность для мобильных устройств */
+/* Mobile device adaptation */
   .expense-row {
     display: flex;
     flex-direction: row;
@@ -19,7 +19,7 @@
     word-break: break-word;
     text-align: right;
   }
-/* Мобильная таблица: супер-адаптивный layout через data-label */
+/* Mobile table: super-adaptive layout via data-label */
 @media (max-width: 600px) {
   table,
   thead,

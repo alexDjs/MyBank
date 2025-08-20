@@ -34,18 +34,18 @@ function formatTime(dateStr) {
   return d.toLocaleTimeString();
 }
 
-// Обработчик кнопки Logout
+// Logout button handler
 const logoutBtn = document.getElementById('logout-btn');
 if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
-    document.getElementById('auth-overlay').style.display = 'flex'; // Центрируем overlay
-    // Таблица и баланс остаются видимыми
+  document.getElementById('auth-overlay').style.display = 'flex'; // Center overlay
+  // Table and balance remain visible
   });
 }
 
-// Автоматическое обновление таблицы и баланса каждые 10 секунд
+// Automatic table and balance refresh every 10 seconds
 setInterval(() => {
   if (localStorage.getItem('token')) {
     loadExpenses();

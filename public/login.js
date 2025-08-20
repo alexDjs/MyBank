@@ -31,7 +31,7 @@ async function login() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('isLoggedIn', 'true');
       document.getElementById('auth-overlay').style.display = 'none';
-      await loadExpenses(); // подгружаем таблицу расходов
+  await loadExpenses(); // load expenses table
     } else {
       if (errorEl) { 
         errorEl.textContent = data.message || 'Login failed'; 
@@ -112,11 +112,11 @@ function formatTime(dateStr) {
   return `${hours}:${minutes}`;
 }
 
-// Привязка кнопки логина
+// Bind login button
 const btn = document.getElementById('login-btn');
 if (btn) btn.addEventListener('click', login);
 
-// Авто-проверка: если уже залогинен, подгружаем расходы
+// Auto-check: if already logged in, load expenses
 if (localStorage.getItem('isLoggedIn') === 'true') {
   document.getElementById('auth-overlay').style.display = 'none';
   loadExpenses();

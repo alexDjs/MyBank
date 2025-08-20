@@ -62,7 +62,7 @@ function createUser(email, password, opts = {}) {
   const user = {
     id: Date.now(),
     email,
-    password, // demo only — hash passwords in production
+  password, // demo only — hash passwords in production
     name: opts.name || email.split('@')[0],
     bank: opts.bank || 'MyBank',
     balance: opts.balance || 0,

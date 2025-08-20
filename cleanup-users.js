@@ -12,11 +12,11 @@ fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
 console.log('Expired users cleaned up.');
 
 if (require.main === module) {
-  // запуск из CLI
+  // run from CLI
   console.log('Cleaning up old tokens...');
   cleanup();
   console.log('Done.');
 } else {
-  // экспорт для server.js
+  // export for server.js
   module.exports = { cleanup };
 }
