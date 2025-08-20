@@ -74,9 +74,10 @@ function renderExpensesTable(expenses) {
     if (isMobile) {
       const block = document.createElement('tr');
       block.innerHTML = `
-        <td colspan="6" style="padding:0; border:none;">
+        <td colspan="7" style="padding:0; border:none;">
           <div class="expense-list">
             <div class="expense-row"><span class="expense-value">${exp.id}</span><span class="expense-label">ID</span></div>
+            <div class="expense-row"><span class="expense-value">${exp.one !== undefined ? exp.one : ''}</span><span class="expense-label">1</span></div>
             <div class="expense-row"><span class="expense-value">${exp.type}</span><span class="expense-label">Type</span></div>
             <div class="expense-row"><span class="expense-value">${exp.amount}</span><span class="expense-label">Amount</span></div>
             <div class="expense-row"><span class="expense-value">${formatDate(exp.date)}</span><span class="expense-label">Date</span></div>
@@ -89,12 +90,13 @@ function renderExpensesTable(expenses) {
     } else {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${exp.id}</td>
-        <td>${exp.type}</td>
-        <td>${exp.amount}</td>
-        <td>${formatDate(exp.date)}</td>
-        <td>${formatTime(exp.date)}</td>
-        <td>${exp.location}</td>
+        <td data-label="ID">${exp.id}</td>
+        <td data-label="1">${exp.one !== undefined ? exp.one : ''}</td>
+        <td data-label="Type">${exp.type}</td>
+        <td data-label="Amount">${exp.amount}</td>
+        <td data-label="Date">${formatDate(exp.date)}</td>
+        <td data-label="Time">${formatTime(exp.date)}</td>
+        <td data-label="Location">${exp.location}</td>
       `;
       tableBody.appendChild(row);
     }

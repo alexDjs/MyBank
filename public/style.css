@@ -28,7 +28,10 @@
   td,
   tr {
     display: block;
-    width: 100%;
+    width: 100vw;
+    box-sizing: border-box;
+    margin: 0;
+    border: 1px solid #ccc;
   }
   thead {
     display: none;
@@ -38,6 +41,8 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     border-radius: 3px;
     background: #fff;
+    border-left: 2px solid #222;
+    border-right: 2px solid #222;
   }
   tbody td {
     display: flex;
