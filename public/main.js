@@ -10,13 +10,12 @@ async function loadExpenses() {
     const tbody = document.querySelector('#table tbody');
       tbody.innerHTML = expenses.map(e => `
         <tr>
-          <td data-label="ID">${e.id}</td>
-          <td data-label="1">${e.one !== undefined ? e.one : ''}</td>
-          <td data-label="Type">${e.type}</td>
-          <td data-label="Amount">${e.amount}</td>
-          <td data-label="Date">${formatDate(e.date)}</td>
-          <td data-label="Time">${formatTime(e.date)}</td>
-          <td data-label="Location">${e.location}</td>
+          <td data-label="ID">${e.id ?? ''}</td>
+          <td data-label="Date">${e.date ? formatDate(e.date) : ''}</td>
+          <td data-label="Type">${e.type ?? ''}</td>
+          <td data-label="Amount" class="${amountClass}">${sign}$${e.amount ?? ''}</td>
+          <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
+          <td data-label="Location">${e.location ?? ''}</td>
         </tr>
       `).join('');
     loadBalance();
