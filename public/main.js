@@ -8,16 +8,16 @@ async function loadExpenses() {
     if (!res.ok) throw new Error('Ошибка загрузки данных: ' + res.status);
     const expenses = await res.json();
     const tbody = document.querySelector('#table tbody');
-      tbody.innerHTML = expenses.map(e => `
-        <tr>
-          <td data-label="ID">${e.id ?? ''}</td>
-          <td data-label="Date">${e.date ? formatDate(e.date) : ''}</td>
-          <td data-label="Type">${e.type ?? ''}</td>
-          <td data-label="Amount" class="${amountClass}">${sign}$${e.amount ?? ''}</td>
-          <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
-          <td data-label="Location">${e.location ?? ''}</td>
-        </tr>
-      `).join('');
+        tbody.innerHTML = expenses.map(e => `
+          <tr>
+            <td data-label="ID">${e.id ?? ''}</td>
+            <td data-label="Type">${e.type ?? ''}</td>
+            <td data-label="Amount" class="${amountClass}">${sign}$${e.amount ?? ''}</td>
+            <td data-label="Date">${e.date ? formatDate(e.date) : ''}</td>
+            <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
+            <td data-label="Location">${e.location ?? ''}</td>
+          </tr>
+        `).join('');
     loadBalance();
   } catch (err) {
     const tbody = document.querySelector('#table tbody');
