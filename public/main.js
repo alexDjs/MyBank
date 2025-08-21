@@ -1,73 +1,138 @@
-const token = localStorage.getItem('token');
+// --- API endpoints ---
+const API_EXPENSES = 'https://mybank-8s6n.onrender.com/expenses';
+const API_ACCOUNT = 'https://mybank-8s6n.onrender.com/account';
 
-async function loadExpenses() {
+// --- DOM elements ---
+const tbody = document.querySelector('#table tbody');
+const balanceEl = document.getElementById('balance');
+const bankEl = document.getElementById('bank-name');
+const ownerEl = document.getElementById('owner-name');
+const countryEl = document.getElementById('country');
+const welcomeEl = document.getElementById('welcome-msg');
+const authOverlay = document.getElementById('auth-overlay');
+const logoutBtn = document.getElementById('logout-btn');
+
+// --- Formatters ---
+function formatDate(iso) {
+  const d = new Date(iso);
+  const pad = n => n.toString().padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  const pad = n => n.toString().padStart(2, '0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+// --- Load account + expenses ---
+async function load() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    localStorage.removeItem('isLoggedIn');
+    if (authOverlay) authOverlay.style.display = 'flex';
+    return;
+  }
+
+  const headers = { 'Authorization': `Bearer ${token}` };
+
   try {
-    const res = await fetch('https://mybank-8s6n.onrender.com/expenses', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    const [expenseRes, accountRes] = await Promise.all([
+      fetch(API_EXPENSES, { headers }),
+      fetch(API_ACCOUNT, { headers })
+    ]);
+
+    if (!expenseRes.ok || !accountRes.ok) throw new Error('Access error');
+
+    const expenses = await expenseRes.json();
+    const account = await accountRes.json();
+
+    // --- Balance calc ---
+    let currentBalance = account.balance;
+    expenses.forEach(e => {
+      if (e.direction === 'out') currentBalance -= e.amount;
+      if (e.direction === 'in') currentBalance += e.amount;
     });
-    if (!res.ok) throw new Error('Ошибка загрузки данных: ' + res.status);
-    const expenses = await res.json();
-    const tbody = document.querySelector('#table tbody');
-    const isMobile = window.innerWidth <= 600;
+
+    // --- Update account info ---
+    bankEl.textContent = `Bank: ${account.bank}`;
+    ownerEl.textContent = `Owner: ${account.owner}`;
+    countryEl.textContent = `Country: ${account.country}`;
+    const sign = currentBalance >= 0 ? '+' : '-';
+    balanceEl.textContent = `Balance: ${sign}$${Math.abs(currentBalance).toFixed(2)}`;
+    balanceEl.classList.remove('positive', 'negative');
+    if (currentBalance > 0) balanceEl.classList.add('positive');
+    else if (currentBalance < 0) balanceEl.classList.add('negative');
+
+    // --- Render expenses table ---
     tbody.innerHTML = expenses.map(e => {
       const amountClass = e.direction === 'in' ? 'amount-in' : 'amount-out';
       const sign = e.direction === 'in' ? '+' : '-';
-      if (isMobile) {
-        // Card layout for mobile: each transaction as a vertical block
-        return `
-          <tr>
-            <td data-label="ID">${e.id ?? ''}</td>
-            <td data-label="Type">${e.type ?? ''}</td>
-            <td data-label="Amount" class="${amountClass}">${sign}$${e.amount ?? ''}</td>
-            <td data-label="Date">${e.date ? formatDate(e.date) : ''}</td>
-            <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
-            <td data-label="Location">${e.location ?? ''}</td>
-          </tr>
-        `;
-      } else {
-        // Standard table for desktop
-        return `
-          <tr>
-            <td data-label="ID">${e.id ?? ''}</td>
-            <td data-label="Type">${e.type ?? ''}</td>
-            <td data-label="Amount" class="${amountClass}">${sign}$${e.amount ?? ''}</td>
-            <td data-label="Date">${e.date ? formatDate(e.date) : ''}</td>
-            <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
-            <td data-label="Location">${e.location ?? ''}</td>
-          </tr>
-        `;
-      }
+      return `
+        <tr>
+          <td data-label="ID">${e.id ?? ''}</td>
+          <td data-label="Type">${e.type ?? ''}</td>
+          <td data-label="Amount" class="${amountClass}">${sign}$${e.amount ?? ''}</td>
+          <td data-label="Date">${e.date ? formatDate(e.date) : ''}</td>
+          <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
+          <td data-label="Location">${e.location ?? ''}</td>
+        </tr>`;
     }).join('');
-    loadBalance();
+
+    // --- UI state ---
+    if (welcomeEl) welcomeEl.style.display = 'none';
+    if (authOverlay) authOverlay.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'block';
+
   } catch (err) {
-    const tbody = document.querySelector('#table tbody');
-    if (tbody) tbody.innerHTML = `<tr><td colspan='6' style='color:red;text-align:center;'>${err.message}</td></tr>`;
+    console.error('Error loading data:', err);
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('token');
+    if (authOverlay) authOverlay.style.display = 'flex';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+    tbody.innerHTML = `<tr><td colspan="6" style="color:red;text-align:center;">${err.message}</td></tr>`;
   }
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString();
-}
-function formatTime(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString();
-}
-
-// Logout button handler
-const logoutBtn = document.getElementById('logout-btn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('isLoggedIn');
-  document.getElementById('auth-overlay').style.display = 'flex'; // Center overlay
-  // Table and balance remain visible
-  });
+// --- Logout ---
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('isLoggedIn');
+  if (authOverlay) authOverlay.style.display = 'flex';
+  if (logoutBtn) logoutBtn.style.display = 'none';
+  tbody.innerHTML = '';
+  balanceEl.textContent = 'Balance: 0';
+  bankEl.textContent = 'Bank: -';
+  ownerEl.textContent = 'Owner: -';
+  countryEl.textContent = 'Country: -';
 }
 
-// Automatic table and balance refresh every 10 seconds
+// --- Init on DOM ready ---
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('isLoggedIn') === 'true') {
+    if (authOverlay) authOverlay.style.display = 'none';
+    if (welcomeEl) {
+      welcomeEl.style.display = 'block';
+      setTimeout(() => {
+        welcomeEl.style.display = 'none';
+        load();
+      }, 3000);
+    } else {
+      load();
+    }
+    if (logoutBtn) logoutBtn.style.display = 'block';
+  } else {
+    if (authOverlay) authOverlay.style.display = 'flex';
+    if (welcomeEl) welcomeEl.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+  }
+
+  if (logoutBtn) logoutBtn.addEventListener('click', logout);
+});
+
+// --- Auto-refresh every 10s ---
 setInterval(() => {
   if (localStorage.getItem('token')) {
-    loadExpenses();
+    load();
   }
 }, 10000);
