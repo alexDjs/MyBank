@@ -8,7 +8,25 @@ async function loadExpenses() {
     if (!res.ok) throw new Error('Ошибка загрузки данных: ' + res.status);
     const expenses = await res.json();
     const tbody = document.querySelector('#table tbody');
-        tbody.innerHTML = expenses.map(e => `
+    const isMobile = window.innerWidth <= 600;
+    tbody.innerHTML = expenses.map(e => {
+      const amountClass = e.direction === 'in' ? 'amount-in' : 'amount-out';
+      const sign = e.direction === 'in' ? '+' : '-';
+      if (isMobile) {
+        // Card layout for mobile: each transaction as a vertical block
+        return `
+          <tr>
+            <td data-label="Type">${e.type ?? ''}</td>
+            <td data-label="Amount" class="${amountClass}">${sign}$${e.amount ?? ''}</td>
+            <td data-label="Date">${e.date ? formatDate(e.date) : ''}</td>
+            <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
+            <td data-label="Location">${e.location ?? ''}</td>
+            <td data-label="ID">${e.id ?? ''}</td>
+          </tr>
+        `;
+      } else {
+        // Standard table for desktop
+        return `
           <tr>
             <td data-label="ID">${e.id ?? ''}</td>
             <td data-label="Type">${e.type ?? ''}</td>
@@ -17,7 +35,9 @@ async function loadExpenses() {
             <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
             <td data-label="Location">${e.location ?? ''}</td>
           </tr>
-        `).join('');
+        `;
+      }
+    }).join('');
     loadBalance();
   } catch (err) {
     const tbody = document.querySelector('#table tbody');
