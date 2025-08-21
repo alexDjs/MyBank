@@ -15,20 +15,8 @@ const DATA_PATH = './data.json';
 
 // ===== Helpers for working with data.json =====
 function loadData() {
-  if (!fs.existsSync(DATA_PATH)) {
-    // если файла нет — создаём пустую структуру
-    const initialData = { users: [], expenses: [], account: { balance: 0, bank: '-', owner: '-', country: '-' } };
-    fs.writeFileSync(DATA_PATH, JSON.stringify(initialData, null, 2));
-    return initialData;
-  }
-
   const raw = fs.readFileSync(DATA_PATH, 'utf-8');
-  try {
-    return JSON.parse(raw);
-  } catch (err) {
-    console.error('Error parsing data.json:', err);
-    return { users: [], expenses: [], account: { balance: 0, bank: '-', owner: '-', country: '-' } };
-  }
+  return JSON.parse(raw);
 }
 
 function saveData(data) {
@@ -38,6 +26,8 @@ function saveData(data) {
 // ===== Middleware =====
 app.use(cors());
 app.use(bodyParser.json());
+// Эта строка была в первом коде и нужна, чтобы отдавать HTML
+app.use(express.static('public'));
 
 // ===== Register =====
 app.post('/register', async (req, res) => {
@@ -105,8 +95,6 @@ app.post('/expenses', authMiddleware, (req, res) => {
   };
 
   data.expenses.push(expense);
-
-  // обновляем баланс
   if (expense.direction === 'out') data.account.balance -= Number(amount) || 0;
   else data.account.balance += Number(amount) || 0;
 
@@ -133,8 +121,6 @@ app.delete('/expenses/:id', authMiddleware, (req, res) => {
   if (index === -1) return res.status(404).json({ message: 'Expense not found' });
 
   const deleted = data.expenses.splice(index, 1);
-
-  // корректировка баланса при удалении
   if (deleted[0]) {
     if (deleted[0].direction === 'out') data.account.balance += Number(deleted[0].amount) || 0;
     else data.account.balance -= Number(deleted[0].amount) || 0;
@@ -152,7 +138,7 @@ app.get('/account', authMiddleware, (req, res) => {
 
 // ===== Health-check =====
 app.get('/', (req, res) => {
-  res.send('OK');
+  res.send('Server is running!');
 });
 
 // ===== Start Server =====
