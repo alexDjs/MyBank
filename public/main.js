@@ -16,12 +16,12 @@ async function loadExpenses() {
         // Card layout for mobile: each transaction as a vertical block
         return `
           <tr>
+            <td data-label="ID">${e.id ?? ''}</td>
             <td data-label="Type">${e.type ?? ''}</td>
             <td data-label="Amount" class="${amountClass}">${sign}$${e.amount ?? ''}</td>
             <td data-label="Date">${e.date ? formatDate(e.date) : ''}</td>
             <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
             <td data-label="Location">${e.location ?? ''}</td>
-            <td data-label="ID">${e.id ?? ''}</td>
           </tr>
         `;
       } else {
