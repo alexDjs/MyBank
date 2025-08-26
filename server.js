@@ -81,12 +81,23 @@ app.get('/expenses', authMiddleware, (req, res) => {
 });
 
 app.post('/expenses', authMiddleware, (req, res) => {
-  const { type, amount, location, direction } = req.body;
+  const { id, type, amount, location, direction } = req.body;
   const data = loadData();
   const now = new Date();
 
+  // Определяем следующий id, если не указан
+  let nextId;
+  if (id !== undefined && id !== null) {
+    nextId = id;
+  } else {
+    const maxId = data.expenses.length > 0
+      ? Math.max(...data.expenses.map(e => Number(e.id) || 0))
+      : 0;
+    nextId = String(maxId + 1);
+  }
+
   const expense = {
-    id: String(Date.now()),
+    id: nextId,
     type,
     amount,
     direction: direction || 'out',
