@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+HEAD
 const http = require('http');
 
 const [,, email, password] = process.argv;
@@ -107,4 +107,4 @@ function cleanup(maxAgeMs = 7 * 24 * 3600 * 1000) {
 }
 
 module.exports = { createUser, authenticate, getUserByToken, cleanup, findUserByEmail };
->>>>>>> 5f1913e5ab8256d146bb1ead7784611a303847f4
+ 5f1913e5ab8256d146bb1ead7784611a303847f4
