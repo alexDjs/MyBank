@@ -1,7 +1,7 @@
 {
   "users": [
     {
-     "id": "113",
+      "id": "113",
       "email": "admin@mybank.com",
       "password": "$2b$10$RE1M.gTH8xVbB.Ueat6Vwe1yb8nuASKQM4Rea.fPlolOLElmD/V4e",
       "lastActive": 1755537738361
@@ -12,6 +12,5 @@
     "bank": "MyBank",
     "country": "Poland",
     "balance": 0
-  },
- 
+  }
 }
