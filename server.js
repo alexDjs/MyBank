@@ -81,11 +81,23 @@ app.get('/expenses', authMiddleware, (req, res) => {
 });
 
 app.post('/expenses', authMiddleware, (req, res) => {
-  const { id, type, amount, location, direction } = req.body;
+  const { id, type } = req.body;
+  let { amount, location, direction } = req.body;
   const data = loadData();
   const now = new Date();
 
-  // Определяем следующий id, если не указан
+  // normalize amount and direction: store amount as positive number and infer direction from sign if not provided
+  let amt = Number(amount) || 0;
+  if (amt < 0) {
+    amt = Math.abs(amt);
+    if (!direction) direction = 'out';
+  }
+  if (!direction) {
+    // default to 'in' for positive amounts, 'out' for zero can remain 'out'
+    direction = amt > 0 ? 'in' : 'out';
+  }
+
+  // Determine next id if not provided
   let nextId;
   if (id !== undefined && id !== null) {
     nextId = id;
@@ -99,15 +111,16 @@ app.post('/expenses', authMiddleware, (req, res) => {
   const expense = {
     id: nextId,
     type,
-    amount,
-    direction: direction || 'out',
+    amount: amt,
+    direction: direction,
     location,
     date: now.toISOString()
   };
 
+  // apply signed delta to account balance
+  const signed = expense.direction === 'out' ? -Number(expense.amount) : Number(expense.amount);
   data.expenses.push(expense);
-  if (expense.direction === 'out') data.account.balance -= Number(amount) || 0;
-  else data.account.balance += Number(amount) || 0;
+  data.account.balance = Number(data.account.balance || 0) + signed;
 
   saveData(data);
   res.json(expense);
@@ -118,8 +131,25 @@ app.put('/expenses/:id', authMiddleware, (req, res) => {
   const data = loadData();
   const expense = data.expenses.find(e => e.id === id);
   if (!expense) return res.status(404).json({ message: 'Expense not found' });
+  // Before changing, compute old signed value
+  const oldSigned = (expense.direction === 'out' ? -1 : 1) * (Number(expense.amount) || 0);
+
+  // Normalize incoming fields: if amount provided, handle sign and direction
+  if ('amount' in req.body) {
+    let newAmt = Number(req.body.amount) || 0;
+    if (newAmt < 0) {
+      newAmt = Math.abs(newAmt);
+      req.body.direction = req.body.direction || 'out';
+    }
+    req.body.amount = newAmt;
+  }
 
   Object.assign(expense, req.body);
+
+  // Compute new signed value and apply delta
+  const newSigned = (expense.direction === 'out' ? -1 : 1) * (Number(expense.amount) || 0);
+  const delta = newSigned - oldSigned;
+  data.account.balance = Number(data.account.balance || 0) + delta;
 
   saveData(data);
   res.json(expense);
