@@ -11,7 +11,7 @@
     "owner": "Oleksandr-Shchehlov",
     "bank": "MyBank",
     "country": "Poland",
-    "balance": 0
+  "balance": 10000
   },
   "expenses": [
     {
