@@ -85,8 +85,9 @@ async function load() {
     bankEl.textContent = `Bank: ${account.bank}`;
     ownerEl.textContent = `Owner: ${account.owner}`;
     countryEl.textContent = `Country: ${account.country}`;
-    const sign = currentBalance >= 0 ? '+' : '-';
-    balanceEl.textContent = `Balance: ${sign}$${Math.abs(currentBalance).toFixed(2)}`;
+  const sign = currentBalance >= 0 ? '+' : '-';
+  // Use the same formatter as table amounts so integers don't show ".00"
+  balanceEl.textContent = `Balance: ${sign}$${formatAmount(Math.abs(currentBalance))}`;
     balanceEl.classList.remove('positive', 'negative');
     if (currentBalance > 0) balanceEl.classList.add('positive');
     else if (currentBalance < 0) balanceEl.classList.add('negative');
