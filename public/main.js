@@ -13,16 +13,47 @@ const authOverlay = document.getElementById('auth-overlay');
 const logoutBtn = document.getElementById('logout-btn');
 
 // --- Formatters ---
-function formatDate(iso) {
-  const d = new Date(iso);
+function toDateObject(value) {
+  if (!value && value !== 0) return null;
+  // if already a Date
+  if (value instanceof Date) return value;
+  // if numeric timestamp
+  if (typeof value === 'number') return new Date(value);
+  // if string that looks like an ISO timestamp or number
+  const asNumber = Number(value);
+  if (!isNaN(asNumber) && value.toString().trim() !== '') {
+    // treat numeric-string as timestamp (seconds or ms)
+    // heuristic: if number length <= 10 -> seconds, multiply by 1000
+    if (value.toString().length <= 10) return new Date(asNumber * 1000);
+    return new Date(asNumber);
+  }
+  // fallback: try Date parse
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function formatDate(value) {
+  const d = toDateObject(value);
+  if (!d) return '';
   const pad = n => n.toString().padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function formatTime(iso) {
-  const d = new Date(iso);
+function formatTime(value) {
+  // if value is already a short time string like '14:30' return it
+  if (typeof value === 'string' && /^\d{1,2}:\d{2}(:\d{2})?$/.test(value.trim())) return value.trim();
+  const d = toDateObject(value);
+  if (!d) return '';
   const pad = n => n.toString().padStart(2, '0');
   return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+// Format amount for display: integers without decimals, fractional with up to 2 decimals
+function formatAmount(value) {
+  const n = Number(value) || 0;
+  if (Number.isInteger(n)) return n.toString();
+  // Use locale formatting but limit to 2 decimals and trim unnecessary zeros
+  return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
 // --- Load account + expenses ---
@@ -64,8 +95,8 @@ async function load() {
     tbody.innerHTML = expenses.map(e => {
     const amountClass = e.direction === 'in' ? 'amount-in' : 'amount-out';
     const sign = e.direction === 'in' ? '+' : '-';
-    const amt = Number(e.amount) || 0;
-    const amtText = `${sign}$${amt.toFixed(2)}`;
+  const amt = Number(e.amount) || 0;
+  const amtText = `${sign}$${formatAmount(amt)}`;
     return `
         <tr>
           <td data-label="ID">${e.id ?? ''}</td>
