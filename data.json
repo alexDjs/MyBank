@@ -11,16 +11,16 @@
     "owner": "Oleksandr-Shchehlov",
     "bank": "MyBank",
     "country": "Poland",
-  "balance": "1000"
+  "balance": 10000
   },
   "expenses": [
     {
-        "id": "1",
-        "type": "EVO",
-        "amount": "1000",
-        "direction": "in",
-        "location": "Wroclaw"
-        
+      "id": "1",
+      "type": "Salary",
+      "amount": 10000,
+      "direction": "in",
+      "location": "WROCLAW",
+      "date": "2025-06-07T18:27:02.344Z"
     }
   ]
 }
