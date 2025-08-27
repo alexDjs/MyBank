@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MyBank — Demo Banking App (Slide)</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#38bdf8;--muted:#94a3b8;--white:#ffffff}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071028 0%, #081022 100%);font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    .slide{display:flex;align-items:center;justify-content:center;height:100%;padding:40px}
+    .card{width:1000px;max-width:92%;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.02));border-radius:12px;padding:48px 56px;color:var(--white);box-shadow:0 10px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+    .title{font-size:34px;font-weight:700;margin:0 0 10px}
+    .subtitle{font-size:16px;color:var(--muted);margin:0 0 24px}
+    .row{display:flex;gap:32px;align-items:flex-start}
+    .col{flex:1}
+    .feature{background:rgba(255,255,255,0.02);padding:18px;border-radius:8px;margin-bottom:12px}
+    .feature h4{margin:0 0 6px;font-size:16px;color:var(--accent)}
+    .feature p{margin:0;color:var(--muted);font-size:14px}
+    .cta{margin-top:18px}
+    .links a{color:var(--accent);text-decoration:none;font-weight:600}
+    .small{font-size:12px;color:var(--muted);margin-top:16px}
+    @media (max-width:700px){.card{padding:28px}.row{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="card" role="article" aria-label="MyBank demo slide">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+        <div>
+          <h1 class="title">MyBank — Demo Banking App</h1>
+          <div class="subtitle">Lightweight Node/Express backend + static frontend — ready for demos and API testing</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:600;color:var(--accent)">Live demo</div>
+          <div class="small"><a class="links" href="https://mybank-8s6n.onrender.com" target="_blank" rel="noopener">https://mybank-8s6n.onrender.com</a></div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:18px">
+        <div class="col">
+          <div class="feature">
+            <h4>What it shows</h4>
+            <p>Authentication (JWT), CRUD for transactions, server logging and responsive UI (desktop + mobile).</p>
+          </div>
+          <div class="feature">
+            <h4>Key points</h4>
+            <p>Ready to test using Postman / curl / PowerShell — server persists data to <code>data.json</code>.</p>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="feature">
+            <h4>How to demo</h4>
+            <p>Open the live URL → register/login → add a transaction → show table update and server logs (no install required).</p>
+          </div>
+          <div class="feature">
+            <h4>Repo & Contact</h4>
+            <p>Source: <a class="links" href="https://github.com/alexDjs/MyBank" target="_blank" rel="noopener">github.com/alexDjs/MyBank</a><br>LinkedIn: <a class="links" href="https://www.linkedin.com/in/oleksandr-shchehlov/" target="_blank" rel="noopener">Oleksandr Shchehlov</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta" style="display:flex;gap:18px;align-items:center;justify-content:flex-start;flex-wrap:wrap">
+        <a href="https://mybank-8s6n.onrender.com" target="_blank" rel="noopener" style="background:var(--accent);color:#042026;padding:10px 14px;border-radius:8px;font-weight:700;text-decoration:none">Open Live Demo</a>
+        <a href="https://github.com/alexDjs/MyBank" target="_blank" rel="noopener" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white);padding:10px 14px;border-radius:8px;text-decoration:none">View Repo</a>
+      </div>
+
+      <div class="small">Tip: open this file in a browser and use "Save as PDF" or take a screenshot to post on LinkedIn.</div>
+    </div>
+  </div>
+</body>
+</html>
