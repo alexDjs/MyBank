@@ -47,12 +47,8 @@ async function load() {
     const expenses = await expenseRes.json();
     const account = await accountRes.json();
 
-    // --- Balance calc ---
-    let currentBalance = account.balance;
-    expenses.forEach(e => {
-      if (e.direction === 'out') currentBalance -= e.amount;
-      if (e.direction === 'in') currentBalance += e.amount;
-    });
+  // --- Balance: use server-provided balance (server already applies deltas)
+  let currentBalance = Number(account.balance) || 0;
 
     // --- Update account info ---
     bankEl.textContent = `Bank: ${account.bank}`;
@@ -66,13 +62,15 @@ async function load() {
 
     // --- Render expenses table ---
     tbody.innerHTML = expenses.map(e => {
-      const amountClass = e.direction === 'in' ? 'amount-in' : 'amount-out';
-      const sign = e.direction === 'in' ? '+' : '-';
-      return `
+    const amountClass = e.direction === 'in' ? 'amount-in' : 'amount-out';
+    const sign = e.direction === 'in' ? '+' : '-';
+    const amt = Number(e.amount) || 0;
+    const amtText = `${sign}$${amt.toFixed(2)}`;
+    return `
         <tr>
           <td data-label="ID">${e.id ?? ''}</td>
           <td data-label="Type">${e.type ?? ''}</td>
-          <td data-label="Amount" class="${amountClass}">${sign}$${e.amount ?? ''}</td>
+      <td data-label="Amount" class="${amountClass}">${amtText}</td>
           <td data-label="Date">${e.date ? formatDate(e.date) : ''}</td>
           <td data-label="Time">${e.date ? formatTime(e.date) : ''}</td>
           <td data-label="Location">${e.location ?? ''}</td>
